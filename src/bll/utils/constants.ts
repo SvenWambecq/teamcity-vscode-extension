@@ -12,6 +12,8 @@ export class Constants {
     public static readonly EXPERIMENTAL_TFVC_PRETESTED_SUPPORTED = `${Constants.EXTENSION_NAME_PREFIX}experimental.tfvc.pretestedSupport`;
     public static readonly LAST_LOGIN = `${Constants.EXTENSION_NAME_PREFIX}credentials.lastLogin`;
     public static readonly TFS_LOCATION_SETTING_NAME = "tfvc.location";
+    public static readonly P4_LOCATION_SETTING_NAME = "perforce.path";
+    public static readonly P4_WORKSPACE = "perforce.client";
     public static readonly GIT_PATH_SETTING_NAME = "git.path";
     public static readonly DEFAULT_URL = "http://buildserver";
     public static readonly SERVICE_PREFIX = "jetbrains.teamcity.vscode";
@@ -43,8 +45,8 @@ export class Constants {
     public static readonly ADD_ENV_VARIABLE_COMMAND_NAME = "teamcity.addEnvVariable";
     public static readonly ROOT_PROJECT_ID = "_Root";
     public static readonly TARGET_NAME_SEPARATOR = "|";
-    public static readonly REFRESH_MY_CHANGES: string = "teamcity.refreshMyChanges" ;
-    public static readonly RESET_BUILD_CONFIGURATION: string = "teamcity.resetBuildCustomization" ;
+    public static readonly REFRESH_MY_CHANGES: string = "teamcity.refreshMyChanges";
+    public static readonly RESET_BUILD_CONFIGURATION: string = "teamcity.resetBuildCustomization";
 }
 
 /**

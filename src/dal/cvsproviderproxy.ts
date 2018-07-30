@@ -1,24 +1,25 @@
-import {CvsSupportProvider} from "./cvsprovider";
-import {TYPES} from "../bll/utils/constants";
-import {CheckInInfo} from "../bll/entities/checkininfo";
-import {Uri, window, workspace} from "vscode";
-import {TfvcProvider} from "./tfsprovider";
-import {inject, injectable} from "inversify";
-import {Logger} from "../bll/utils/logger";
-import {MessageConstants} from "../bll/utils/messageconstants";
-import {Utils} from "../bll/utils/utils";
-import {GitProviderActivator} from "./git/GitProviderActivator";
-import {Settings} from "../bll/entities/settings";
-import {Context} from "../view/Context";
-import {GitProvider} from "./gitprovider";
+import { CvsSupportProvider } from "./cvsprovider";
+import { TYPES } from "../bll/utils/constants";
+import { CheckInInfo } from "../bll/entities/checkininfo";
+import { Uri, window, workspace } from "vscode";
+import { TfvcProvider } from "./tfsprovider";
+import { inject, injectable } from "inversify";
+import { Logger } from "../bll/utils/logger";
+import { MessageConstants } from "../bll/utils/messageconstants";
+import { Utils } from "../bll/utils/utils";
+import { GitProviderActivator } from "./git/GitProviderActivator";
+import { Settings } from "../bll/entities/settings";
+import { Context } from "../view/Context";
+import { GitProvider } from "./gitprovider";
+import { P4Provider } from "./p4provider";
 
 @injectable()
 export class CvsProviderProxy {
     private actualProviders: CvsSupportProvider[] = [];
     private readonly isGitSupported: boolean;
     constructor(@inject(TYPES.GitProviderActivator) private readonly gitProviderActivator: GitProviderActivator,
-                @inject(TYPES.Settings) private readonly mySettings: Settings,
-                @inject(TYPES.Context) context: Context) {
+        @inject(TYPES.Settings) private readonly mySettings: Settings,
+        @inject(TYPES.Context) context: Context) {
         const rootPaths: Uri[] = this.collectAllRootPaths();
         this.isGitSupported = mySettings.isGitSupported();
         if (this.isGitSupported) {
@@ -63,6 +64,16 @@ export class CvsProviderProxy {
             Logger.logWarning(`Could not activate tfvc provider for ${rootPath.fsPath}`);
             Logger.logDebug(Utils.formatErrorMessage(err));
         }
+
+        try {
+            const p4Provider: CvsSupportProvider = await P4Provider.tryActivateInPath(rootPath);
+            providers.push(p4Provider);
+            Logger.logInfo(`P4 provider was activated for ${rootPath.fsPath}`);
+        } catch (err) {
+            Logger.logWarning(`Could not activate P4 provider for ${rootPath.fsPath}`);
+            Logger.logDebug(Utils.formatErrorMessage(err));
+        }
+
         if (!this.isGitSupported) {
             return providers;
         }
@@ -74,6 +85,7 @@ export class CvsProviderProxy {
         } else {
             Logger.logWarning(`Could not activate git provider for ${rootPath.fsPath}`);
         }
+
         return providers;
     }
 
