@@ -23,6 +23,7 @@ export class P4Provider implements CvsSupportProvider {
     private workspaceRootPathAsUri: Uri;
     private p4Path: string;
     private p4Client: string;
+    private p4Host: string;
 
     private constructor(rootPath: Uri) {
         this.workspaceRootPathAsUri = rootPath;
@@ -30,13 +31,15 @@ export class P4Provider implements CvsSupportProvider {
     }
 
     public static async tryActivateInPath(workspaceRootPath: Uri): Promise<CvsSupportProvider> {
+        let wsProxy = new WorkspaceProxy();
         const instance: P4Provider = new P4Provider(workspaceRootPath);
         const pathFinder: Finder = new P4PathFinder();
         const p4Path: string = await pathFinder.find();
         const isActiveValidator: Validator = new P4IsActiveValidator(p4Path, workspaceRootPath.fsPath);
         await isActiveValidator.validate();
         instance.p4Path = p4Path;
-        instance.p4Client = (new WorkspaceProxy()).getConfigurationValue(Constants.P4_WORKSPACE);
+        instance.p4Client = wsProxy.getConfigurationValue(Constants.P4_WORKSPACE);
+        instance.p4Host = wsProxy.getConfigurationValue(Constants.P4_HOST);
         return instance;
     }
 
@@ -119,7 +122,7 @@ export class P4Provider implements CvsSupportProvider {
     private async tryPushCvsResource(resources: CvsResource[], changeType: string, fileAbsPath: string, serverFilePath: string): Promise<void> {
         try {
             let resource: CvsResource = await this.getCvsResource(changeType, fileAbsPath);
-            resource.serverFilePath = `perforce://ctc-perforce.cochlear.com:1666://${serverFilePath}`;
+            resource.serverFilePath = `perforce://${this.p4Client}://${serverFilePath}`;
             resources.push(resource);
         } catch (err) {
             Logger.logError(Utils.formatErrorMessage(err));

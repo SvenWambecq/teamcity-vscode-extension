@@ -14,6 +14,7 @@ export class Constants {
     public static readonly TFS_LOCATION_SETTING_NAME = "tfvc.location";
     public static readonly P4_LOCATION_SETTING_NAME = "perforce.path";
     public static readonly P4_WORKSPACE = "perforce.client";
+    public static readonly P4_HOST = "perforce.host";
     public static readonly GIT_PATH_SETTING_NAME = "git.path";
     public static readonly DEFAULT_URL = "http://buildserver";
     public static readonly SERVICE_PREFIX = "jetbrains.teamcity.vscode";
