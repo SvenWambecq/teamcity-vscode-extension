@@ -18,12 +18,17 @@ import { Utils } from "../bll/utils/utils";
 import { Constants } from "../bll/utils/constants";
 import { WorkspaceProxy } from "../bll/moduleproxies/workspace-proxy";
 
+interface Dictionary<ValueType> {
+    [Key: string]: ValueType;
+}
+
 export class P4Provider implements CvsSupportProvider {
     private workspaceRootPath: string;
     private workspaceRootPathAsUri: Uri;
     private p4Path: string;
     private p4Client: string;
     private p4Host: string;
+    private _cache: Dictionary<string> = {}
 
     private constructor(rootPath: Uri) {
         this.workspaceRootPathAsUri = rootPath;
@@ -90,12 +95,14 @@ export class P4Provider implements CvsSupportProvider {
         const parseBriefDiffRegExp: RegExp = /^(.*)#(\d+) - ([^ ]*) (.*)$/mg;
         const locationRegExp: RegExp = /^(.*) (.*) (.*)$/mg;
         const localResources: CvsResource[] = [];
-        const briefDiffCommand: string = `"${this.p4Path}" -c ${this.p4Client} opened`;
+
+        const briefDiffCommand: string = `"${this.p4Path}" -c ${this.p4Client} opened ${this.workspaceRootPath}/...`;
+
         let p4DiffResult: string;
         try {
             const briefDiffCommandOutput = await cp.exec(briefDiffCommand);
             p4DiffResult = briefDiffCommandOutput.stdout.toString("utf8").trim();
-            Logger.logInfo(briefDiffCommandOutput);
+            Logger.logInfo(p4DiffResult);
         } catch (err) {
             Logger.logError(`P4SupportProvider#getAbsPaths: caught an exception during tf diff command: ${Utils.formatErrorMessage(err)}`);
             return [];
@@ -107,21 +114,34 @@ export class P4Provider implements CvsSupportProvider {
             }
             const serverPath: string = match[1].trim();
             const changeType: string = match[3].trim();
-            const filePathOutput = await cp.exec(`"${this.p4Path}" -c ${this.p4Client} where ${serverPath}`);
-            const matchFile: string[] = filePathOutput.stdout.toString("utf8").trim().split(" ");
-            const localFile: string = matchFile[2].trim().toLowerCase()
-            const wsRoot: string = this.workspaceRootPath.toLowerCase()
-            if (localFile.startsWith(wsRoot)) {
-                await this.tryPushCvsResource(localResources, changeType, matchFile[2].trim(), matchFile[0].trim());
+            if (!(serverPath in this._cache)) {
+                try {
+                    const filePathOutput = await cp.exec(`"${this.p4Path}" -c ${this.p4Client} where ${serverPath}`);
+                    const matchFile: string[] = filePathOutput.stdout.toString("utf8").trim().split(" ");
+                    const localFile: string = matchFile[2].trim().toLowerCase();
+                    const wsRoot: string = this.workspaceRootPath.toLowerCase();
+                    if (localFile.startsWith(wsRoot)) {
+                        this.tryPushCvsResource(localResources, changeType, matchFile[2].trim(), serverPath);
+                        this._cache[serverPath] = matchFile[2].trim();
+                    }
+                } catch (err) {
+                    continue
+                }
+            } else {
+                try {
+                    this.tryPushCvsResource(localResources, changeType, this._cache[serverPath], serverPath);
+                } catch (err) {
+                    continue;
+                }
             }
         }
         Logger.logDebug(`P4SupportProvider#getLocalResources: ${localResources.length} changed resources was detected`);
         return localResources;
     }
 
-    private async tryPushCvsResource(resources: CvsResource[], changeType: string, fileAbsPath: string, serverFilePath: string): Promise<void> {
+    private tryPushCvsResource(resources: CvsResource[], changeType: string, fileAbsPath: string, serverFilePath: string): void {
         try {
-            let resource: CvsResource = await this.getCvsResource(changeType, fileAbsPath);
+            let resource: CvsResource = this.getCvsResource(changeType, fileAbsPath);
             resource.serverFilePath = `perforce://${this.p4Client}://${serverFilePath}`;
             resources.push(resource);
         } catch (err) {
@@ -129,7 +149,7 @@ export class P4Provider implements CvsSupportProvider {
         }
     }
 
-    private async getCvsResource(changeType: string, fileAbsPath: string): Promise<CvsResource> {
+    private getCvsResource(changeType: string, fileAbsPath: string): CvsResource {
         const relativePath: string = path.relative(this.getRootPath(), fileAbsPath);
         let resource: CvsResource;
         if (changeType.indexOf(P4ChangeType.ADD) !== -1) {

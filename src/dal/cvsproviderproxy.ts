@@ -57,20 +57,20 @@ export class CvsProviderProxy {
     private async detectProvidersInDirectory(rootPath: Uri): Promise<CvsSupportProvider[]> {
         const providers: CvsSupportProvider[] = [];
         try {
-            const tfvcProvider: CvsSupportProvider = await TfvcProvider.tryActivateInPath(rootPath);
-            providers.push(tfvcProvider);
-            Logger.logInfo(`Tfvc provider was activated for ${rootPath.fsPath}`);
-        } catch (err) {
-            Logger.logWarning(`Could not activate tfvc provider for ${rootPath.fsPath}`);
-            Logger.logDebug(Utils.formatErrorMessage(err));
-        }
-
-        try {
             const p4Provider: CvsSupportProvider = await P4Provider.tryActivateInPath(rootPath);
             providers.push(p4Provider);
             Logger.logInfo(`P4 provider was activated for ${rootPath.fsPath}`);
         } catch (err) {
             Logger.logWarning(`Could not activate P4 provider for ${rootPath.fsPath}`);
+            Logger.logDebug(Utils.formatErrorMessage(err));
+        }
+
+        try {
+            const tfvcProvider: CvsSupportProvider = await TfvcProvider.tryActivateInPath(rootPath);
+            providers.push(tfvcProvider);
+            Logger.logInfo(`Tfvc provider was activated for ${rootPath.fsPath}`);
+        } catch (err) {
+            Logger.logWarning(`Could not activate tfvc provider for ${rootPath.fsPath}`);
             Logger.logDebug(Utils.formatErrorMessage(err));
         }
 

@@ -1,13 +1,13 @@
 import * as path from "path";
-import {Uri} from "vscode";
-import {LeaveSelectableItem} from "../presentable/leaveselectableitem";
-import {CvsResource} from "./cvsresource";
+import { Uri } from "vscode";
+import { LeaveSelectableItem } from "../presentable/leaveselectableitem";
+import { CvsResource } from "./cvsresource";
 
 export class CvsResourceItem extends LeaveSelectableItem {
     private readonly cvsResource: CvsResource;
 
     constructor(cvsResource: CvsResource) {
-        super(cvsResource.fileName, true);
+        super(cvsResource.fileName, false);
         this.cvsResource = cvsResource;
     }
 
