@@ -15,7 +15,7 @@ First, you will need to install [Visual Studio Code](https://code.visualstudio.c
 
 To install the extension with the latest version of Visual Studio Code (version `1.25.0` is the latest as of this writing), download the last pre-release version of the TeamCity extension from the [corresponding page](https://github.com/JetBrains/teamcity-vscode-extension/releases), bring up the Visual Studio Code Command Palette (`F1`), type `Install from VSIX` and choose the `teamcity-vscode-extension-***.vsix` file in the opened dialoge box. Restart Visual Studio Code.
 
-Alternatively, you can also install using the VS Code ```--install-extension``` command line switch providing the path to the .vsix: 
+Alternatively, you can also install using the VS Code ```--install-extension``` command line switch providing the path to the .vsix:
 ```
 code --install-extension myextension.vsix
 ```
@@ -28,7 +28,7 @@ To sign in to your account, run the `teamcity signin` command. You will be promp
 On Windows, your credentials wil be stored by Windows Credential Manager. On macOS, your credentials will be stored in the Keychain. On Linux, your credentials will be stored in a file on your local file system in a subdirectory of your home folder. That file is created only with RW rights for the user running Visual Studio Code.
 
 ## Commands
-The extension provides several commands for interacting with the TeamCity API. 
+The extension provides several commands for interacting with the TeamCity API.
 In the Command Palette (`F1`), type `TeamCity` and choose a command.
 
 * `TeamCity: Sign in` – This command is used for signing in to a TeamCity server. When required credentials are provided, they are sent to TeamCity server
@@ -56,7 +56,7 @@ To start debugging the extension, do the following:
 1. Clone the repository from the GitHub [repository](https://github.com/JetBrains/teamcity-vscode-extension/issues).
 2. Execute the `npm install` command from the root of the project.
 3. Open the project via the `Visual Studio Code` editor
-4. `Debug` -> `Start Debugging` 
+4. `Debug` -> `Start Debugging`
 
 ## Packaging
 To package a custom version of the extension, please refer to the [VSCode documentation](https://code.visualstudio.com/docs/extensions/publish-extension#_packaging-extensions).
@@ -69,3 +69,7 @@ or participate in [discussions](https://github.com/JetBrains/teamcity-vscode-ext
 ## License
 This extension is [licensed under the MIT License](LICENSE.txt).
 
+
+
+
+g
